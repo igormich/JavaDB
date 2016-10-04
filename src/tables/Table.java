@@ -22,8 +22,8 @@ public interface Table extends ReadonlyTable{
 	default void insert(Object[] values){
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		int i=0;
-		for(String name:getFieldsNames())
-			if(i<values.length)
+		for(String name: getFieldsNames())
+			if((i<values.length)&&(!getFieldInfo(name).isAutoIncriment()))
 				data.put(name, values[i++]);
 		insert(data);
 	}

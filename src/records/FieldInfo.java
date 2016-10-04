@@ -11,6 +11,11 @@ public class FieldInfo {
 
 	public static final int PRIMARY_KEY = 0;
 	
+	public static Supplier<Object> autoincriment() {
+		int[] i = new int[]{0};
+		return () -> i [0]++;
+	}
+	
 	private static final EnumSet<FieldKey> EMPTY_KEYS = EnumSet.noneOf(FieldKey.class);
 	private static final Predicate<?> ANY = (o) -> true;
 	private static final Supplier<?> NULL_SUPPLIER= () -> null;
@@ -26,7 +31,7 @@ public class FieldInfo {
 		this.clazz = clazz;
 		this.keys = keys;
 		this.constraint = constraint;
-		this.defaultValue = defaultValue;
+		this.defaultValue = isAutoIncriment() ? autoincriment() : defaultValue;
 	}
 
 	public FieldInfo(String name, Class<?> clazz) {
@@ -51,6 +56,10 @@ public class FieldInfo {
 		this(name, clazz, EMPTY_KEYS, ANY, defaut);
 	}
 
+	public <T> FieldInfo(String name, Class<T> clazz, EnumSet<FieldKey> keys, Supplier<?> defaut) {
+		this(name, clazz, keys, ANY, defaut);
+	}
+
 	public Class<?> getType() {
 		return clazz;
 	}
@@ -70,12 +79,16 @@ public class FieldInfo {
 	public boolean isUnique() {
 		return keys.stream().anyMatch(FieldKey::isUnique);
 	}
+	public boolean isAutoIncriment() {
+		return keys.contains(FieldKey.AUTO_INCREMENT);
+	}
 	public Object getDefault() {
 		return defaultValue.get();
 	}
 	public Object orGetDefault(Object value) {
 		return value!=null? value : getDefault();
 	}
+	
 	public Predicate<Object> getConstraint() {
 		@SuppressWarnings("unchecked")
 		Predicate<Object> result = (Predicate<Object>) constraint;
@@ -105,5 +118,7 @@ public class FieldInfo {
 					String.format("Constraint in field '%s' not valid for %s", name, value));
 		}
 	}
+
+
 
 }

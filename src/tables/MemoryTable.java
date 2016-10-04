@@ -219,7 +219,7 @@ public class MemoryTable implements Table{
 		return isUsed.stream()
 				.mapToObj(DirectRecord::new)
 				.filter(where)
-				.peek(r ->updateRecord(r.index,update.apply(r))).count();
+				.peek(r ->updateRecord(r.index, update.apply(r))).count();
 	}
 	private void updateRecord(int pos, Map<String, Object> newValues) {
 		for(String fieldName:newValues.keySet())
