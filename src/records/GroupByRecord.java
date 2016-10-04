@@ -19,7 +19,9 @@ public class GroupByRecord implements Record {
 	public Object get(String name) {
 		if(name.equals(field))
 			return value;
-		throw new IllegalStateException("Get can be applyed only for fields used in GroupBy");
+		if(list.get(0).getFieldsNames().contains(name))
+				throw new IllegalStateException("Get can be applyed only for fields used in GroupBy");
+		throw new RuntimeException(String.format("Can not found data for '%s'", name));	
 	}
 	@Override
 	public Object max(String name) {
@@ -37,26 +39,28 @@ public class GroupByRecord implements Record {
 	public long count() {
 		return list.size();
 	}
-	public double avg(String name) {
+	@Override
+	public Number avg(String name) {
 		if(getFieldInfo(name).getType() == Double.class)
 			return list.stream().mapToDouble(r -> r.getDouble(name)).average().getAsDouble();
 		if(getFieldInfo(name).getType() == Long.class)
 			return list.stream().mapToDouble(r -> r.getLong(name)).average().getAsDouble();
 		if(getFieldInfo(name).getType() == Integer.class)
-			return list.stream().mapToDouble(r -> r.getInt(name)).average().getAsDouble();
+			return (float)list.stream().mapToDouble(r -> r.getInt(name)).average().getAsDouble();
 		if(getFieldInfo(name).getType() == Float.class)
-			return list.stream().mapToDouble(r -> r.getFloat(name)).average().getAsDouble();
+			return (float)list.stream().mapToDouble(r -> r.getFloat(name)).average().getAsDouble();
 		throw new IllegalStateException("Avg operation can be  can be applied for only number types");
 	}
-	public double sum(String name) {
+	@Override
+	public Number sum(String name) {
 		if(getFieldInfo(name).getType() == Double.class)
 			return list.stream().mapToDouble(r -> r.getDouble(name)).sum();
 		if(getFieldInfo(name).getType() == Long.class)
-			return list.stream().mapToDouble(r -> r.getLong(name)).sum();;
+			return list.stream().mapToLong(r -> r.getLong(name)).sum();;
 		if(getFieldInfo(name).getType() == Integer.class)
-			return list.stream().mapToDouble(r -> r.getInt(name)).sum();
+			return list.stream().mapToInt(r -> r.getInt(name)).sum();
 		if(getFieldInfo(name).getType() == Float.class)
-			return list.stream().mapToDouble(r -> r.getFloat(name)).sum();
+			return (float)list.stream().mapToDouble(r -> r.getFloat(name)).sum();
 		throw new IllegalStateException("Avg operation can be  can be applied for only number types");
 	}
 	@Override

@@ -29,7 +29,11 @@ public class JoinRecord implements Record{
 		@Override
 		public Object get(String name) {
 			Record record = namesMapping.get(name);
-			return record.get(name);
+			if(record!=null)
+				return record.get(name);
+			System.out.println(namesMapping.keySet());
+			throw new RuntimeException(
+					String.format("Can not found data for '%s'", name));
 		}
 		@Override
 		public Set<String> getFieldsNames() {

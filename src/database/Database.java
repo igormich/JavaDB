@@ -1,14 +1,14 @@
 package database;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
-
+import java.util.function.Predicate;
 import records.FieldInfo;
+import records.ForeignKey;
 import records.Record;
+import select.Query;
 import select.Select;
 import tables.ReadonlyTable;
 import tables.Table;
-import tables.TableStream;
 
 public interface Database {
 	
@@ -17,8 +17,7 @@ public interface Database {
 	Table createTable(String name, FieldInfo... fields);
 	Table getTable(String name);
 	ReadonlyTable getTableOrView(String name);
-	ReadonlyTable createView(String name, Supplier<TableStream<? extends Record>> dataSourse);
-	
+	ReadonlyTable createView(String name, Query query);
 	default <T extends Record> Select select(){
 		return new Select(this);
 	}
@@ -39,9 +38,11 @@ public interface Database {
 	default <T extends Record> Select select(String field){
 		return select(field, r -> r.get(field));
 	}
-	default TableValueInserter insertInto(String table, String... fields){
-		return new TableValueInserter(getTable(table), fields);
+	default Insert insertInto(String table, String... fields){
+		return new Insert(getTable(table), fields);
+	}
+	default <T> ForeignKey<T> foreignKey(String table, String field){
+		return new ForeignKey<T>(getTable(table), field);
 	}
 
-	
 }

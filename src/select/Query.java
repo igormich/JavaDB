@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 import records.Record;
 
-interface Query {
+public interface Query {
 	
 	public default Iterator<Record> execute() {
 		return getData().iterator();

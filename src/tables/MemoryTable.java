@@ -90,8 +90,6 @@ public class MemoryTable implements Table{
 	protected Map<String,FieldInfo> fieldsInfo = new HashMap<>();
 	protected Map<String,Map<Object,BitSet>> indices  = new HashMap<>();
 	private Map<String, Set<Object>> uniques = new HashMap<>();
-	//protected Set<String> uniques = new HashSet<>();
-	//protected Set<Object> notNulls = new HashSet<>();;
 	protected String name;
 	
 	
@@ -104,52 +102,31 @@ public class MemoryTable implements Table{
 		return fields.keySet();
 	}
 	@Override
-	public Map<String, FieldInfo> getFieldsTypes(){
+	public Map<String, FieldInfo> getFieldsInfo(){
 		return Collections.unmodifiableMap(fieldsInfo);
 	}
-	private void validate(String[] names, Object[] values) {
-		for(int i=0;i<names.length;i++){
-			String name = names[i];
-			Object value = i<values.length ? values[i] : null;
-			FieldInfo fieldInfo = fieldsInfo.get(name);
-			if(fieldInfo.isNotNull() && (value == null)){
-				throw new IllegalArgumentException(
-						String.format("Field '%s' is NOT NULL but inserted value is null", name));
-			}
-			if(fieldInfo.isUnique() && (uniques.get(name).contains(value))){
-				throw new IllegalArgumentException(
-						String.format("Dublicated values for unique field '%s'. Value is %s", name, value));
-			}
-			if((value != null) && (value.getClass() != fieldInfo.getType())){
-				throw new IllegalArgumentException(
-						String.format("Field '%s' type and value type are different (%s, %s)", name, 
-								value.getClass().getSimpleName(), fieldInfo.getType().getSimpleName()));
-			}
-			try{
-				if(!fieldInfo.getConstraint().test(value)){
-					throw new IllegalArgumentException(
-							String.format("Constraint in field '%s' not valid for %s", name, value));
-				}
-			} catch (Exception e) {
-				throw new IllegalArgumentException(
-						String.format("Constraint in field %s not valid for %s", name, value));
-			}
+	private void validate(String name, Object value) {
+		FieldInfo fieldInfo = fieldsInfo.get(name);
+		fieldInfo.validate(value);
+		if(fieldInfo.isUnique() && (uniques.get(name).contains(value))){
+			throw new IllegalArgumentException(
+					String.format("Dublicated values for unique field '%s'. Value is %s", name, value));
 		}
 	}
 	@Override
-	public synchronized void insert(String[] names, Object[] values) {
-		if ((names ==null)||(names.length == 0))
-			names = getFieldsNames().toArray(names);
-		validate(names, values);
+	//public synchronized void insert(String[] names, Object[] values) {
+	public synchronized void insert(Map<String,Object> values) {
+		//validate(names, values);
+		values.forEach(this::validate);
 		int pos = isUsed.nextClearBit(0);
 		boolean isLast = pos == isUsed.length();
-		for(int i=0;i<names.length;i++){
-			String name = names[i];
-			Object value = i<values.length ? values[i] : null;
+		//for(int i=0;i<names.length;i++){
+		for(String name:getFieldsNames()){
+			Object value = values.containsKey(name) ? values.get(name) : getFieldInfo(name).getDefault();
 			if(isLast)
-				fields.get(name).add(pos,values[i]);
+				fields.get(name).add(pos,value);
 			else
-				fields.get(name).set(pos,values[i]);
+				fields.get(name).set(pos,value);
 			if(indices.containsKey(name)){
 				addToIndex(name,value,pos);
 			}
@@ -159,7 +136,7 @@ public class MemoryTable implements Table{
 		}
 		isUsed.set(pos);
 	}
-	private void addToIndex(String name, Object value,int pos) {
+	private void addToIndex(String name, Object value, int pos) {
 		BitSet fields = indices.get(name).get(value);
 		if(fields == null){
 			fields = new BitSet();
@@ -171,7 +148,9 @@ public class MemoryTable implements Table{
 	public boolean contains(String name, Object value) {
 		if(isIndex(name))
 			return indices.get(name).containsKey(value);
-		return fields.get(name).contains(value);
+		if(fields.get(name) != null)
+			return fields.get(name).contains(value);
+		throw new IllegalArgumentException(String.format("Field '%s' not exist", name));
 	}
 	@Override
 	public int hashCode() {
@@ -187,30 +166,6 @@ public class MemoryTable implements Table{
 			return false;
 		MemoryTable other = (MemoryTable) obj;
 		return Objects.equals(name, other.name);
-	}
-	@Override
-	public TableStream<Record> getRecords() {
-		return new TableStream<Record>(isUsed.stream().mapToObj(DirectRecord::new),getNullField());		
-	}
-	@Override
-	public TableStream<Record> getRecordsForIndex(String field) {
-		Map<?, BitSet> index = indices.get(field);
-		if(index != null)
-			return new TableStream<Record>(index.values().stream().flatMapToInt(list -> list.stream())
-					.mapToObj(DirectRecord::new),getNullField());
-		return null;		
-	}
-	@Override
-	public TableStream<Record> getRecordsForIndex(String field,Object value) {
-		Map<?, BitSet> index = indices.get(field);
-		if(index != null){
-			BitSet fields = index.get(value);
-			if(fields != null)
-				return new TableStream<Record>(fields.stream().mapToObj(DirectRecord::new), getNullField());
-			else
-				return new TableStream<Record>(Stream.empty(), getNullField());
-		}
-		return null;		
 	}
 	@Override
 	public String getName() {
@@ -240,6 +195,7 @@ public class MemoryTable implements Table{
 		return isUsed.stream()
 				.mapToObj(DirectRecord::new)
 				.filter(where)
+				.peek(r -> uniques.forEach((f,s) -> s.remove(r.get(f))))
 				.mapToInt(r -> r.index)
 				.peek(i -> isUsed.clear(i))
 				.peek(i -> deleteFromIndex(i))
@@ -266,16 +222,23 @@ public class MemoryTable implements Table{
 				.peek(r ->updateRecord(r.index,update.apply(r))).count();
 	}
 	private void updateRecord(int pos, Map<String, Object> newValues) {
+		for(String fieldName:newValues.keySet())
+			validate(fieldName, newValues.get(fieldName));
 		for(String fieldName:newValues.keySet()){
 			Object newValue = newValues.get(fieldName);
+			Object oldValue = fields.get(fieldName).get(pos);
 			if(indices.containsKey(fieldName)){
-				Object oldValue = fields.get(fieldName).get(pos);
 				indices.get(fieldName).get(oldValue).clear(pos);
 				indices.get(fieldName).get(newValue).set(pos);
+			}
+			if(uniques.containsKey(fieldName)){
+				uniques.get(fieldName).remove(oldValue);
+				uniques.get(fieldName).add(newValue);
 			}
 			fields.get(fieldName).set(pos, newValue);
 		}
 	}
+
 	@Override
 	public void deleteField(String name) {
 		fields.remove(name);
@@ -293,19 +256,27 @@ public class MemoryTable implements Table{
 				indices.put(name, new TreeMap<>());
 			} else {
 				throw new IllegalArgumentException(
-						String.format("Field %s cannot be indexed, because is not comparable", name));
+						String.format("Field '%s' cannot be indexed, because is not comparable", name));
 			}
 		}	
 		if(fieldInfo.isUnique())
 			uniques.put(name, new HashSet<>());
-		/*if(field.isNotNull())
-			notNulls.add(name);*/
-		//isUsed.stream().mapToObj(DirectRecord::new).
-		//	forEach(r -> fieldValues.add(r.index, valueProducer.apply(r)));
 	}
 	@Override
 	public Stream<Record> getData() {
 		return isUsed.stream().mapToObj(DirectRecord::new);
+	}
+	@Override
+	public Stream<Record> getDataForIndex(String field, Object value) {
+		Map<?, BitSet> index = indices.get(field);
+		if(index != null){
+			BitSet fields = index.get(value);
+			if(fields != null)
+				return fields.stream().mapToObj(DirectRecord::new);
+			else
+				return Stream.empty();
+		}
+		throw new IllegalArgumentException(String.format("Field '%s' is not index", name));	
 	}
 
 }

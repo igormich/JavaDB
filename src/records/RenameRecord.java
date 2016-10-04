@@ -28,12 +28,12 @@ public class RenameRecord implements Record{
 
 	@Override
 	public FieldInfo getFieldInfo(String name) {
-		return null;
+		return new FieldInfo(name, renameMap.get(name).apply(sourse).getClass());
 	}
 
 	@Override
 	public String getTableName() {
-		return "TEMPORALLY TABLE: RENAME";
+		return null;
 	}
 	public String toString() {
 		StringBuilder result = new StringBuilder();

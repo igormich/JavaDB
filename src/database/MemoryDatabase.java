@@ -2,14 +2,14 @@ package database;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import records.FieldInfo;
-import records.Record;
+import select.Query;
+import select.Select;
 import tables.MemoryTable;
+import tables.QueryView;
 import tables.ReadonlyTable;
 import tables.Table;
-import tables.TableStream;
 
 public class MemoryDatabase implements Database {
 
@@ -28,17 +28,6 @@ public class MemoryDatabase implements Database {
 	}
 
 	@Override
-	public ReadonlyTable createView(String name,
-			Supplier<TableStream<? extends Record>> dataSourse) {
-		//if (tables.containsKey(name))
-		//	throw new IllegalStateException("View " + name + " exist");
-		//SelectView view = new SelectView(name, dataSourse);
-		//views.put(name, view);
-		//return view;
-		return null;
-	}
-
-	@Override
 	public Table getTable(String name) {
 		if(tables.containsKey(name))
 			return tables.get(name);
@@ -53,6 +42,22 @@ public class MemoryDatabase implements Database {
 			return views.get(name);
 		throw new IllegalArgumentException(String.format("Table or view %s not exist", name));
 		
+	}
+	@Override
+	public ReadonlyTable createView(String name, Query query) {
+		if (tables.containsKey(name))
+					throw new IllegalStateException("View " + name + " exist");
+		QueryView view = new QueryView(name, query);
+		views.put(name, view);
+		return view;
+	}
+
+	public Delete delete(String table) {
+		return new Delete(getTable(table));
+	}
+
+	public Update update(String table) {
+		return new Update(getTable(table),(r) -> true);
 	}
 
 }

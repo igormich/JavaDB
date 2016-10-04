@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import records.GroupByRecord;
 import records.JoinRecord;
-import records.ListRecord;
 import records.Record;
 import records.RenameRecord;
 
@@ -132,14 +132,16 @@ public class TableStream<T extends Record> {
 		return new TableStream<T>(stream.sorted(comparator), nullField);
 	}
 
-	public TableStream<ListRecord> groupBy(String name) {
+	public TableStream<GroupByRecord> groupBy(String name) {
 		Map<Object, List<Record>> map = stream.filter(r -> r.get(name) != null)
 				.collect(Collectors.groupingBy(r -> r.get(name)));
-		return new TableStream<ListRecord>(map.values().stream().map(ListRecord::new), nullField);
+		//return new TableStream<GroupByRecord>(map.values().stream().map(name,GroupByRecord::new), nullField);
+		return null;
 	}
 
-	public ListRecord group() {
-		return new ListRecord(stream.collect(Collectors.toList()));
+	public GroupByRecord group() {
+		//return new ListRecord(stream.collect(Collectors.toList()));
+		return null;
 	}
 
 	public TableStream<T> top(int limit) {

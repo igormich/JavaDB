@@ -19,6 +19,10 @@ public interface Record {
 	default float getFloat(String name) {
 		return (float) get(name);
 	}
+	default boolean getBoolean(String name) {
+		return (boolean) get(name);
+	}
+	
 	Set<String> getFieldsNames();
 	FieldInfo getFieldInfo(String name);
 	String getTableName();
@@ -32,9 +36,10 @@ public interface Record {
 	default Object min(String name){
 		throw new UnsupportedOperationException("Min can be applyed only for GroupBy result");
 	}
-	default double avg(String name){
+	default Number avg(String name){
 		throw new UnsupportedOperationException("Avg can be applyed only for GroupBy result");
 	}
-
-	
+	default Number sum(String name){
+		throw new UnsupportedOperationException("Avg can be applyed only for GroupBy result");
+	}
 }

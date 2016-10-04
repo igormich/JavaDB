@@ -1,4 +1,5 @@
 package tables;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,9 +18,14 @@ public interface Table extends ReadonlyTable{
 	//}
 	void addField(FieldInfo fieldInfo); 
 	void deleteField(String name);
-	void insert(String[] names, Object[] values);
+	void insert(Map<String, Object> values);
 	default void insert(Object[] values){
-		insert(null, values);
+		HashMap<String, Object> data = new HashMap<String, Object>();
+		int i=0;
+		for(String name:getFieldsNames())
+			if(i<values.length)
+				data.put(name, values[i++]);
+		insert(data);
 	}
 	void createIndex(String name); 
 	void dropIndex(String name);
@@ -28,5 +34,6 @@ public interface Table extends ReadonlyTable{
 		return update(update,(r) -> true);
 	}
 	long update(Function<Record, Map<String, Object>> function, Predicate<Record> where);
+	
 	
 }
