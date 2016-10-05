@@ -22,7 +22,7 @@ public class QueryView implements ReadonlyTable {
 			if(name.startsWith(getTableName())){
 					return record.get(name.substring(getTableName().length()+1));
 			}
-			throw new IllegalArgumentException(String.format("Field name must start with view name '%s'",name));
+			throw new IllegalArgumentException(String.format("Field name must start with view name '%s'", name));
 		}
 
 		@Override
@@ -35,7 +35,7 @@ public class QueryView implements ReadonlyTable {
 			if(name.startsWith(getTableName())){
 				return record.getFieldInfo(name.substring(getTableName().length()+1));
 			}
-			throw new IllegalArgumentException(String.format("Field name must start with view name '%s'",name));
+			throw new IllegalArgumentException(String.format("Field name must start with view name '%s'", name));
 		}
 
 		@Override

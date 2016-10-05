@@ -92,11 +92,13 @@ public class MultiTableOperations {
 				field("comment", String.class));
 		database.createTable("offices", 
 				field("name", String.class).primaryKey(),
+				//bad variant no control for operations on city.postCode
 				field("city", String.class).index().constraint((o) -> city.contains("postCode", o)));
 		database.createTable("employees", 
 				field("login", String.class).primaryKey(),
 				field("name", String.class).notNull(),
-				field("office", Integer.class).index().foreignKey("offices", "name"));
+				//good variant, provide auto control for operations on city.postCode
+				field("office", String.class).index().foreignKey("offices", "name"));
 		; 
 	}
 }

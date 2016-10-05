@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import records.FieldInfo;
 import records.Record;
 
-public class MemoryTable implements Table{
+public class MemoryTable extends AbstractTable{
 	
 	private class DirectRecord implements Record{
 		private final int index;
@@ -105,22 +105,11 @@ public class MemoryTable implements Table{
 	public Map<String, FieldInfo> getFieldsInfo(){
 		return Collections.unmodifiableMap(fieldsInfo);
 	}
-	private void validate(String name, Object value) {
-		FieldInfo fieldInfo = fieldsInfo.get(name);
-		fieldInfo.validate(value);
-		if(fieldInfo.isUnique() && (uniques.get(name).contains(value))){
-			throw new IllegalArgumentException(
-					String.format("Dublicated values for unique field '%s'. Value is %s", name, value));
-		}
-	}
 	@Override
-	//public synchronized void insert(String[] names, Object[] values) {
 	public synchronized void insert(Map<String,Object> values) {
-		//validate(names, values);
 		values.forEach(this::validate);
 		int pos = isUsed.nextClearBit(0);
 		boolean isLast = pos == isUsed.length();
-		//for(int i=0;i<names.length;i++){
 		for(String name:getFieldsNames()){
 			Object value = values.containsKey(name) ? values.get(name) : getFieldInfo(name).getDefault();
 			if(isLast)
@@ -148,6 +137,8 @@ public class MemoryTable implements Table{
 	public boolean contains(String name, Object value) {
 		if(isIndex(name))
 			return indices.get(name).containsKey(value);
+		if(uniques.get(name) != null)
+			return uniques.get(name).contains(value);
 		if(fields.get(name) != null)
 			return fields.get(name).contains(value);
 		throw new IllegalArgumentException(String.format("Field '%s' not exist", name));

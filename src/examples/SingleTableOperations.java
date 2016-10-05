@@ -1,5 +1,5 @@
 package examples;
-import java.awt.Image;
+
 import java.awt.image.BufferedImage;
 import java.util.Date;
 
@@ -164,6 +164,7 @@ public class SingleTableOperations {
 			.forEachRemaining(System.out::println);
 	}
 	
+
 	public static void main(String[] args) throws InterruptedException {
 		database = new MemoryDatabase();
 		createTable();

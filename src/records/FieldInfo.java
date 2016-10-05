@@ -8,18 +8,6 @@ import java.util.function.Supplier;
 
 public class FieldInfo {
 	
-	public static Supplier<Object> autoincrementI() {
-		int[] i = new int[]{0};
-		return () -> i[0]++;
-	}
-	public static Supplier<Object> autoincrementL() {
-		long[] l = new long[]{0};
-		return () -> l[0]++;
-	}
-	private static final EnumSet<FieldKey> EMPTY_KEYS = EnumSet.noneOf(FieldKey.class);
-	private static final Predicate<?> ANY = (o) -> true;
-	private static final Supplier<?> NULL_SUPPLIER= () -> null;
-	
 	private final String name;
 	private final Class<?> type;
 	private final EnumSet<FieldKey> keys;
@@ -30,32 +18,14 @@ public class FieldInfo {
 	public <T> FieldInfo(Field<T> field) {
 		this.name = field.getName();
 		this.type = field.getType();
-		this.keys = field.getKeys();
+		this.keys = field.getKeys().clone();
 		this.constraint = field.getConstraint();
 		this.defaultValue = field.getDefaultValue();
 		this.foreignKey = field.getForeignKey();
 	}
-	public <T> FieldInfo(String name, Class<?> clazz, EnumSet<FieldKey> keys, Predicate<T> constraint,Supplier<?> defaultValue, ForeignKey<?> foreignKey) {
-		this.name = name;
-		this.type = clazz;
-		this.keys = keys;
-		this.constraint = constraint;
-		if(isAutoIncrement()){
-			if (this.type == Integer.class)
-				this.defaultValue =  autoincrementI();
-			else if (this.type == Long.class)
-				this.defaultValue =  autoincrementL();
-			else
-				throw new IllegalArgumentException("AUTO_INCREMENT can be applied only to Long or Integer types");
-			
-		} else {
-			this.defaultValue = defaultValue;
-		}
-		this.foreignKey = foreignKey;
-	}
 
-	public FieldInfo(String name, Class<?> clazz) {
-		this(name, clazz, EMPTY_KEYS, ANY, NULL_SUPPLIER, null);
+	public <T> FieldInfo(String name, Class<T> clazz) {
+		this(new Field<T>(name, clazz));
 	}
 	
 	/*public FieldInfo(String name, Class<?> clazz, EnumSet<FieldKey> keys) {
@@ -114,30 +84,12 @@ public class FieldInfo {
 		Predicate<Object> result = (Predicate<Object>) constraint;
 		return result;
 	}
-
-	public void validate(Object value) {
-		if(isNotNull() && (value == null)){
-			throw new IllegalArgumentException(
-					String.format("Field '%s' is NOT NULL but inserted value is null", name));
-		}
-		if((value != null) && (value.getClass() != getType())){
-			throw new IllegalArgumentException(
-					String.format("Field '%s' type and value type are different (%s, %s)", name, 
-							value.getClass().getSimpleName(), getType().getSimpleName()));
-		}
-		try{
-			if(!getConstraint().test(value)){
-				throw new IllegalArgumentException(
-						String.format("Constraint in field '%s' not valid for %s", name, value));
-			}
-		} catch (IllegalArgumentException e) {
-			throw e;
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new IllegalArgumentException(
-					String.format("Constraint in field '%s' not valid for %s", name, value));
-		}
+	public ForeignKey<Object> getForeignKey() {
+		@SuppressWarnings("unchecked")
+		ForeignKey<Object> result = (ForeignKey<Object>) foreignKey;
+		return result;
 	}
+
 
 
 

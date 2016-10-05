@@ -113,4 +113,8 @@ public class Field<T>{
 				foreignKey = new ForeignKey<T>(database.getTable(foreignKeyInfo.getFirst()), foreignKeyInfo.getSecond());
 			return foreignKey;
 		}
+		public Field<T> keys(EnumSet<FieldKey> keys) {
+			this.keys = keys;
+			return this;
+		}
 }
