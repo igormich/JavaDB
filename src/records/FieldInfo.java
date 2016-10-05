@@ -11,11 +11,14 @@ public class FieldInfo {
 
 	public static final int PRIMARY_KEY = 0;
 	
-	public static Supplier<Object> autoincriment() {
+	public static Supplier<Object> autoincrimentI() {
 		int[] i = new int[]{0};
-		return () -> i [0]++;
+		return () -> i[0]++;
 	}
-	
+	public static Supplier<Object> autoincrimentL() {
+		long[] l = new long[]{0};
+		return () -> l[0]++;
+	}
 	private static final EnumSet<FieldKey> EMPTY_KEYS = EnumSet.noneOf(FieldKey.class);
 	private static final Predicate<?> ANY = (o) -> true;
 	private static final Supplier<?> NULL_SUPPLIER= () -> null;
@@ -31,7 +34,17 @@ public class FieldInfo {
 		this.clazz = clazz;
 		this.keys = keys;
 		this.constraint = constraint;
-		this.defaultValue = isAutoIncriment() ? autoincriment() : defaultValue;
+		if(isAutoIncrement()){
+			if (this.clazz == Integer.class)
+				this.defaultValue =  autoincrimentI();
+			else if (this.clazz == Long.class)
+				this.defaultValue =  autoincrimentL();
+			else
+				throw new IllegalArgumentException("AUTO_INCREMENT can be applied only to Long or Integer types");
+			
+		} else {
+			this.defaultValue = defaultValue;
+		}
 	}
 
 	public FieldInfo(String name, Class<?> clazz) {
@@ -79,7 +92,7 @@ public class FieldInfo {
 	public boolean isUnique() {
 		return keys.stream().anyMatch(FieldKey::isUnique);
 	}
-	public boolean isAutoIncriment() {
+	public boolean isAutoIncrement() {
 		return keys.contains(FieldKey.AUTO_INCREMENT);
 	}
 	public Object getDefault() {

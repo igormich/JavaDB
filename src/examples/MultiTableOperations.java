@@ -53,8 +53,9 @@ public class MultiTableOperations {
 		database.select(
 				"name", r-> r.get("cities.name"),
 				"count", r->r.sum("employeesByOffice.count"))
-			.from("cities","employeesByOffice")
-			.where(r -> Objects.equals(r.get("cities.postCode"), r.get("employeesByOffice.postCode")))
+			//.from("cities","employeesByOffice")
+			//.where(r -> Objects.equals(r.get("cities.postCode"), r.get("employeesByOffice.postCode")))
+			.from("employeesByOffice").join("cities", "employeesByOffice.postCode", "cities.postCode")
 			.groupBy("cities.name")
 			.execute().forEachRemaining(System.out::println);
 	}

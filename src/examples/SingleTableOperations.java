@@ -23,7 +23,7 @@ public class SingleTableOperations {
 		}
 		
 		database.createTable("humans",
-				new FieldInfo("id", Integer.class, EnumSet.of(FieldKey.PRIMARY_KEY, FieldKey.AUTO_INCREMENT)),
+				new FieldInfo("id", Long.class, EnumSet.of(FieldKey.PRIMARY_KEY, FieldKey.AUTO_INCREMENT)),
 				new FieldInfo("name", String.class, EnumSet.of(FieldKey.UNIQUE)),
 				new FieldInfo("sex", String.class, (o) -> "male".equals(o) || "female".equals(o)),
 				new FieldInfo("age", Integer.class, EnumSet.of(FieldKey.NOT_NULL)),

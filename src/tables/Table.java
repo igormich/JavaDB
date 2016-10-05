@@ -9,13 +9,6 @@ import records.Record;
 
 public interface Table extends ReadonlyTable{
 
-	//<T> void addField(String name, Class<T> type, boolean index, boolean unique, Function<Record, T> valueProducer);
-	//default <T> void addField(String name, Class<T> type, Function<Record, T> valueProducer){
-	//	addField(name, type, false, false, valueProducer);
-	//}
-	//default <T> void addField(String name, Class<T> type){
-	//	addField(name, type, false, false, null);
-	//}
 	void addField(FieldInfo fieldInfo); 
 	void deleteField(String name);
 	void insert(Map<String, Object> values);
@@ -23,7 +16,7 @@ public interface Table extends ReadonlyTable{
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		int i=0;
 		for(String name: getFieldsNames())
-			if((i<values.length)&&(!getFieldInfo(name).isAutoIncriment()))
+			if((i<values.length)&&(!getFieldInfo(name).isAutoIncrement()))
 				data.put(name, values[i++]);
 		insert(data);
 	}
