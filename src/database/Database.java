@@ -1,7 +1,8 @@
 package database;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
+
+import records.Field;
 import records.FieldInfo;
 import records.ForeignKey;
 import records.Record;
@@ -43,6 +44,22 @@ public interface Database {
 	}
 	default <T> ForeignKey<T> foreignKey(String table, String field){
 		return new ForeignKey<T>(getTable(table), field);
+	}
+	default Table createTable(String string, Field<?>... fields){
+		FieldInfo[] fieldsInfo = new FieldInfo[fields.length];
+		for(int i=0;i<fields.length;i++) {
+			ForeignKey<?> foreignKey = fields[i].buildForeignKey(this);
+			if(foreignKey!=null){
+				Class<?> otherType = foreignKey.getTable().getFieldInfo(foreignKey.getField()).getType();
+				if(otherType!=fields[i].getType())
+					throw new IllegalArgumentException(
+							String.format("Can not create ForeignKey on different types %s, %s for field %s",
+									otherType.getSimpleName(), fields[i].getType().getSimpleName(), fields[i].getName()));
+			}
+			fieldsInfo[i] = new FieldInfo(fields[i]);
+		}
+		return createTable(string, fieldsInfo);
+		
 	}
 
 }

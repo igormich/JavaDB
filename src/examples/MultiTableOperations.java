@@ -4,8 +4,8 @@ import java.util.Objects;
 
 import database.Database;
 import database.MemoryDatabase;
-import records.FieldInfo;
-import records.FieldKey;
+import static records.Field.field;
+import records.Record;
 import select.Query;
 import tables.Table;
 
@@ -23,14 +23,16 @@ public class MultiTableOperations {
 		
 		System.out.println("group employees by office");
 		Query employeesByOffice = database.select(
-				"name", r-> r.get("offices.name"),
-				"postCode", r-> r.max("offices.city"),
-				"count", r->r.count())
+				"name", r -> r.get("offices.name"),
+				"postCode", r -> r.max("offices.city"),
+				"count", Record::count)
 			.from("offices","employees")
 			.where(r -> Objects.equals(r.get("offices.name"), r.get("employees.office")))
 			.groupBy("offices.name");
+		
 		employeesByOffice.execute().forEachRemaining(System.out::println);
 		database.createView("employeesByOffice", employeesByOffice);
+		
 		System.out.println("group employees by city with using WHERE");	
 		database.select(
 				"name", r-> r.get("cities.name"),
@@ -40,6 +42,7 @@ public class MultiTableOperations {
 					Objects.equals(r.get("offices.name"), r.get("employees.office")))
 			.groupBy("cities.name")
 			.execute().forEachRemaining(System.out::println);
+		
 		System.out.println("group employees by city with using JOIN (is equals prevision)");	
 		database.select(
 				"name", r-> r.get("cities.name"),
@@ -49,13 +52,15 @@ public class MultiTableOperations {
 			.join("employees","offices.name","office")
 			.groupBy("cities.name")
 			.execute().forEachRemaining(System.out::println);
+		
 		System.out.println("group employees by city with VIEW (is equals prevision)");
 		database.select(
 				"name", r-> r.get("cities.name"),
 				"count", r->r.sum("employeesByOffice.count"))
 			//.from("cities","employeesByOffice")
 			//.where(r -> Objects.equals(r.get("cities.postCode"), r.get("employeesByOffice.postCode")))
-			.from("employeesByOffice").join("cities", "employeesByOffice.postCode", "cities.postCode")
+			.from("employeesByOffice")
+			.join("cities", "employeesByOffice.postCode", "cities.postCode")
 			.groupBy("cities.name")
 			.execute().forEachRemaining(System.out::println);
 	}
@@ -82,16 +87,16 @@ public class MultiTableOperations {
 
 	private static void createTables() {
 		Table city = database.createTable("cities", 
-				new FieldInfo("postCode", String.class, FieldKey.PRIMARY_KEY),
-				new FieldInfo("name", String.class),
-				new FieldInfo("comment", String.class));
+				field("postCode", String.class).primaryKey(),
+				field("name", String.class),
+				field("comment", String.class));
 		database.createTable("offices", 
-				new FieldInfo("name", String.class, FieldKey.PRIMARY_KEY),
-				new FieldInfo("city", String.class, FieldKey.INDEX, (o) -> city.contains("postCode", o)));
+				field("name", String.class).primaryKey(),
+				field("city", String.class).index().constraint((o) -> city.contains("postCode", o)));
 		database.createTable("employees", 
-				new FieldInfo("login", String.class, FieldKey.PRIMARY_KEY),
-				new FieldInfo("name", String.class, FieldKey.NOT_NULL),
-				new FieldInfo("office", String.class, FieldKey.INDEX, database.foreignKey("offices", "name")));
+				field("login", String.class).primaryKey(),
+				field("name", String.class).notNull(),
+				field("office", Integer.class).index().foreignKey("offices", "name"));
 		; 
 	}
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import records.FieldInfo;
 import select.Query;
-import select.Select;
 import tables.MemoryTable;
 import tables.QueryView;
 import tables.ReadonlyTable;
@@ -20,6 +19,8 @@ public class MemoryDatabase implements Database {
 	public Table createTable(String name, FieldInfo... fields) {
 		if(tables.containsKey(name))
 			throw new IllegalStateException("Table "+ name + " exist");
+		if (views.containsKey(name))
+			throw new IllegalStateException("View " + name + " exist");
 		MemoryTable table = new MemoryTable(name);
 		for(FieldInfo field:fields)
 			table.addField(field);
@@ -47,6 +48,8 @@ public class MemoryDatabase implements Database {
 	public ReadonlyTable createView(String name, Query query) {
 		if (tables.containsKey(name))
 					throw new IllegalStateException("View " + name + " exist");
+		if (views.containsKey(name))
+			throw new IllegalStateException("View " + name + " exist");
 		QueryView view = new QueryView(name, query);
 		views.put(name, view);
 		return view;

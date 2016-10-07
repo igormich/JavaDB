@@ -256,7 +256,7 @@ public class MemoryTable implements Table{
 				indices.put(name, new TreeMap<>());
 			} else {
 				throw new IllegalArgumentException(
-						String.format("Field '%s' cannot be indexed, because is not comparable", name));
+						String.format("Field '%s' cannot be indexed, because %s is not comparable", name,fieldInfo.getType().getSimpleName()));
 			}
 		}	
 		if(fieldInfo.isUnique())

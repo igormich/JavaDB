@@ -1,10 +1,10 @@
 package examples;
 import java.awt.Image;
-import java.util.EnumSet;
+import java.awt.image.BufferedImage;
+import java.util.Date;
 
 import database.MemoryDatabase;
-import records.FieldInfo;
-import records.FieldKey;
+import static records.Field.field;
 import utils.Pair;
 
 
@@ -15,20 +15,22 @@ public class SingleTableOperations {
 	private static void createTable() {
 		try{
 			database.createTable("humans",
-					new FieldInfo("name", String.class, EnumSet.of(FieldKey.PRIMARY_KEY)),
+					field("name", String.class).primaryKey(),
 					//error here, non Comparable can not be used as Index
-					new FieldInfo("portrait", Image.class, EnumSet.of(FieldKey.INDEX)));
+					field("portrait", BufferedImage.class).index());
 		}catch(Exception e){
 			System.out.println("ERROR:"+e.getMessage());
 		}
 		
 		database.createTable("humans",
-				new FieldInfo("id", Long.class, EnumSet.of(FieldKey.PRIMARY_KEY, FieldKey.AUTO_INCREMENT)),
-				new FieldInfo("name", String.class, EnumSet.of(FieldKey.UNIQUE)),
-				new FieldInfo("sex", String.class, (o) -> "male".equals(o) || "female".equals(o)),
-				new FieldInfo("age", Integer.class, EnumSet.of(FieldKey.NOT_NULL)),
-				new FieldInfo("alive", Boolean.class, ()-> Boolean.TRUE)
+				field("id", Long.class).primaryKey().autoIncrement(),
+				field("name", String.class).unique(),
+				field("sex", String.class).constraint((o) -> "male".equals(o) || "female".equals(o)),
+				field("age", Integer.class).notNull(),
+				field("alive", Boolean.class).defaultValue(() -> true),
+				field("createDate", String.class).defaultValue(() -> new Date().toString())
 		);
+		 
 	}
 	
 	private static void insert() {
@@ -126,15 +128,6 @@ public class SingleTableOperations {
 			.forEachRemaining(System.out::println);
 		
 	}
-	
-	public static void main(String[] args) {
-		database = new MemoryDatabase();
-		createTable();
-		insert();
-		select();
-		update();
-		delete();
-	}
 
 	private static void update() {
 		System.out.println("Inc age for all male");
@@ -170,6 +163,14 @@ public class SingleTableOperations {
 			.execute()
 			.forEachRemaining(System.out::println);
 	}
-
+	
+	public static void main(String[] args) throws InterruptedException {
+		database = new MemoryDatabase();
+		createTable();
+		insert();
+		select();
+		update();
+		delete();
+	}
 
 }
