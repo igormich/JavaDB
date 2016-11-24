@@ -2,13 +2,14 @@ package records;
 import java.util.Objects;
 import java.util.Set;
 
+import fields.FieldInfo;
 import tables.ReadonlyTable;
 
-public class NullField implements Record {
+public class NullRecord implements Record {
 
 	private ReadonlyTable table;
 
-	public NullField(ReadonlyTable table) {
+	public NullRecord(ReadonlyTable table) {
 		this.table = table;
 	}
 
@@ -52,7 +53,7 @@ public class NullField implements Record {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		NullField other = (NullField) obj;
+		NullRecord other = (NullRecord) obj;
 		return Objects.equals(table, other.table);
 	}
 

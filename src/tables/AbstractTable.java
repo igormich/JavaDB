@@ -1,6 +1,6 @@
 package tables;
 
-import records.FieldInfo;
+import fields.FieldInfo;
 
 public abstract class AbstractTable implements Table{
 	protected void validate(String name, Object value) {

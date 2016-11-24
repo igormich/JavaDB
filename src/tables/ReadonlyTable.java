@@ -3,15 +3,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import records.FieldInfo;
-import records.NullField;
+import database.DataSourse;
+import fields.FieldInfo;
+import records.NullRecord;
 import records.Record;
 
 public interface ReadonlyTable extends DataSourse{
 	
 	public String getName();
-	default NullField getNullField(){
-		return new NullField(this);
+	default NullRecord getNullField(){
+		return new NullRecord(this);
 	}
 	Set<String> getFieldsNames();
 	Map<String, FieldInfo> getFieldsInfo();
@@ -20,4 +21,8 @@ public interface ReadonlyTable extends DataSourse{
 	boolean contains(String name, Object value);
 
 	Stream<Record> getDataForIndex(String index, Object value);
+	
+	default Record getNullRecord(){
+		return new NullRecord(this);
+	}
 }

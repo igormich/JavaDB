@@ -1,4 +1,4 @@
-package records;
+package fields;
 
 public enum FieldKey {
 	PRIMARY_KEY, INDEX, UNIQUE, NOT_NULL, AUTO_INCREMENT;

@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import records.FieldInfo;
+import fields.FieldInfo;
 import records.Record;
 import select.Query;
 

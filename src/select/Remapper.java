@@ -4,5 +4,5 @@ import java.util.stream.Stream;
 import records.Record;
 
 interface Remapper {
-	Stream<Record> remap(Stream<Record> data);
+	Stream<? extends Record> remap(Stream<? extends Record> data);
 }

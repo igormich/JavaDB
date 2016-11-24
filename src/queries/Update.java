@@ -1,4 +1,4 @@
-package database;
+package queries;
 
 import java.util.Map;
 import java.util.function.Function;

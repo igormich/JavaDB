@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import fields.FieldInfo;
+
 public class JoinRecord implements Record{
 	
 		private Record l;

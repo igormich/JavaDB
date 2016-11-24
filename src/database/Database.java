@@ -2,9 +2,10 @@ package database;
 
 import java.util.function.Function;
 
-import records.Field;
-import records.FieldInfo;
-import records.ForeignKey;
+import fields.Field;
+import fields.FieldInfo;
+import fields.ForeignKey;
+import queries.Insert;
 import records.Record;
 import select.Query;
 import select.Select;

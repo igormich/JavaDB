@@ -29,11 +29,12 @@ public class From implements Query {
 		return new GroupBy(remapper, this, field);
 	}
 	
-	public Stream<Record> getData() {
+	public Stream<? extends Record> getData() {
 			return remapper.remap(getFullData());
 	}
-	public Stream<Record> getFullData() {
-		Stream<Record> result = tables[0].getData();
+	@Override
+	public Stream<? extends Record> getFullData() {
+		Stream<? extends Record> result = tables[0].getData();
 		for(int i=1;i<tables.length;i++) {
 			ReadonlyTable otherTable = tables[i];
 			result = result.flatMap(lr -> otherTable.getData().map(rr -> new JoinRecord(lr, rr)));

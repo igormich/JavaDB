@@ -28,7 +28,7 @@ public class Join implements Query {
 	}
 
 	@Override
-	public Stream<Record> getData() {
+	public Stream<? extends Record> getData() {
 		return remapper.remap(getFullData());
 	}
 

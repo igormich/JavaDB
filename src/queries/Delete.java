@@ -1,4 +1,4 @@
-package database;
+package queries;
 
 import java.util.function.Predicate;
 

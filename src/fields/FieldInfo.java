@@ -1,4 +1,4 @@
-package records;
+package fields;
 
 import java.util.EnumSet;
 import java.util.function.Predicate;

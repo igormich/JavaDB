@@ -34,7 +34,7 @@ public class Select implements Remapper{
 		 return from(Arrays.stream(tables).map(database::getTableOrView).toArray(ReadonlyTable[]::new));
 	}
 	
-	public Stream<Record> remap(Stream<Record> data) {
+	public Stream<? extends Record> remap(Stream<? extends Record> data) {
 		if(fields!=null)
 			return data.map(r -> new RenameRecord(r, names, fields));
 		return data;

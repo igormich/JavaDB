@@ -29,7 +29,7 @@ public class GroupBy implements Query{
 	}
 
 	@Override
-	public Stream<Record> getData() {
+	public Stream<? extends Record> getData() {
 		//Map<Object, List<Record>> map = query.getFullData().filter(r -> r.get(field) != null)
 			//	.collect(Collectors.groupingBy(r -> r.get(field)));
 		return remapper.remap(getFullData());

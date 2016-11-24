@@ -1,10 +1,11 @@
 package examples;
 
+import static fields.Field.field;
+
 import java.util.Objects;
 
 import database.Database;
 import database.MemoryDatabase;
-import static records.Field.field;
 import records.Record;
 import select.Query;
 import tables.Table;

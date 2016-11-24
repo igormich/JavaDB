@@ -58,7 +58,7 @@ public class TableStream<T extends Record> {
 		String fullOtherField = other.getName()+ "." +otherField;
 		Stream<JoinRecord> tempResult = leftJoin(field, other, otherField).stream
 				.peek(rr -> {if(rr.get(fullOtherField) != null){set.add(rr.get(fullOtherField));}});
-		Stream<JoinRecord> result = (Stream<JoinRecord>) Stream.concat(tempResult, other.getRecords().stream
+		Stream<JoinRecord> result = (Stream<JoinRecord>) Stream.concat(tempResult, other.getData()
 				.filter(r -> !set.contains(r.get(otherField))).map(rr -> new JoinRecord(nullField, rr)));
 		return new TableStream<JoinRecord>(result, new JoinRecord(this.nullField, other.getNullField()));
 	}

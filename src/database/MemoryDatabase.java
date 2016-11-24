@@ -3,7 +3,9 @@ package database;
 import java.util.HashMap;
 import java.util.Map;
 
-import records.FieldInfo;
+import fields.FieldInfo;
+import queries.Delete;
+import queries.Update;
 import select.Query;
 import tables.MemoryTable;
 import tables.QueryView;

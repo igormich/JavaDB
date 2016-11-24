@@ -1,9 +1,15 @@
 package records;
 import java.util.Set;
 
+import fields.FieldInfo;
+
 public interface Record {
 	Object get(String name);
-	
+	default <T> T getAs(String name){
+		@SuppressWarnings("unchecked")
+		T result = (T) get(name);
+		return result;
+	}
 	default String getString(String name) {
 		return get(name).toString();
 	}

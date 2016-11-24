@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import records.FieldInfo;
+import fields.FieldInfo;
 import records.Record;
 
 public class MemoryTable extends AbstractTable{
@@ -106,12 +106,14 @@ public class MemoryTable extends AbstractTable{
 		return Collections.unmodifiableMap(fieldsInfo);
 	}
 	@Override
-	public synchronized void insert(Map<String,Object> values) {
-		values.forEach(this::validate);
+	public synchronized void insert(Record values) {
+		//values.forEach(this::validate);
+		Set<String> fieldsNames = values.getFieldsNames();
+		values.getFieldsNames().forEach(name -> validate(name, values.get(name)));
 		int pos = isUsed.nextClearBit(0);
 		boolean isLast = pos == isUsed.length();
 		for(String name:getFieldsNames()){
-			Object value = values.containsKey(name) ? values.get(name) : getFieldInfo(name).getDefault();
+			Object value = fieldsNames.contains(name) ? values.get(name) : getFieldInfo(name).getDefault();
 			if(isLast)
 				fields.get(name).add(pos,value);
 			else

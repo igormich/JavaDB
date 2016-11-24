@@ -20,11 +20,11 @@ public class Where implements Query{
 		this.where = where;
 	}
 
-	public Stream<Record> getData() {
+	public Stream<? extends Record> getData() {
 		return remapper.remap(getFullData());
 	}
 	@Override
-	public Stream<Record> getFullData() {
+	public Stream<? extends Record> getFullData() {
 		return query.getFullData().filter(where);
 	}
 	public GroupBy groupBy(String field) {

@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import fields.FieldInfo;
+
 public class RenameRecord implements Record{
 	
 	private Record sourse;

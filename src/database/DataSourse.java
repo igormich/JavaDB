@@ -1,9 +1,9 @@
-package tables;
+package database;
 
 import java.util.stream.Stream;
 
 import records.Record;
 
 public interface DataSourse {
-	Stream<Record> getData();
+	Stream<? extends Record> getData();
 }

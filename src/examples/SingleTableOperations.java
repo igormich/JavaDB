@@ -1,10 +1,11 @@
 package examples;
 
+import static fields.Field.field;
+
 import java.awt.image.BufferedImage;
 import java.util.Date;
 
 import database.MemoryDatabase;
-import static records.Field.field;
 import utils.Pair;
 
 
